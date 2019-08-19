@@ -256,13 +256,7 @@ apriltag_detector_t *apriltag_detector_create();
 // a single instance should only be provided to one apriltag detector instance.
 void apriltag_detector_add_family_bits(apriltag_detector_t *td, apriltag_family_t *fam, int bits_corrected);
 
-// Tunable, but really, 2 is a good choice. Values of >=3
-// consume prohibitively large amounts of memory, and otherwise
-// you want the largest value possible.
-static inline void apriltag_detector_add_family(apriltag_detector_t *td, apriltag_family_t *fam)
-{
-    apriltag_detector_add_family_bits(td, fam, 2);
-}
+void apriltag_detector_add_family(apriltag_detector_t *td, apriltag_family_t *fam);
 
 // does not deallocate the family.
 void apriltag_detector_remove_family(apriltag_detector_t *td, apriltag_family_t *fam);
