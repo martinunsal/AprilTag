@@ -14,7 +14,7 @@ if(CMAKE_COMPILER_IS_GNUCXX AND UNIX)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 endif()
 
-add_library(APRILTAG_LIBRARY ${lib_srcs} ${lib_hdrs})
+add_library(APRILTAG_LIBRARY SHARED ${lib_srcs} ${lib_hdrs})
 
 if(WIN32 AND MSVC)
   target_link_libraries (APRILTAG_LIBRARY PTHREADS_LIBRARY)

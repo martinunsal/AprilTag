@@ -36,3 +36,5 @@ CMakeLists.txt.user*
 */CMakeFiles
 CMakeCache.txt
 *~
+/.vs
+/out
