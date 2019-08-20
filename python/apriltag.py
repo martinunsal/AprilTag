@@ -248,10 +248,6 @@ Detector.
                         action='store_true',
                         help='Spend more time trying to precisely localize tags')
 
-    parser.add_argument('-c', dest='quad_contours', default=False,
-                        action='store_true',
-                        help='Use new contour-based quad detection')
-
 
 ######################################################################
 
@@ -311,9 +307,6 @@ library used by ctypes.
         self.tag_detector.refine_decode = int(options.refine_decode)
         self.tag_detector.refine_pose = int(options.refine_pose)
 
-        if options.quad_contours:
-            self.libc.apriltag_detector_enable_quad_contours(self.tag_detector, 1)
-
         self.families = []
 
         flist = self.libc.apriltag_family_list()
@@ -340,7 +333,7 @@ library used by ctypes.
         if self.tag_detector is not None:
             self.libc.apriltag_detector_destroy(self.tag_detector)
 
-    def detect(self, img, return_image=False):
+    def detect(self, img):
 
         '''Run detectons on the provided image. The image must be a grayscale
 image of type numpy.uint8.'''
@@ -382,19 +375,9 @@ image of type numpy.uint8.'''
             return_info.append(detection)
 
         self.libc.image_u8_destroy(c_img)
-
-        if return_image:
-
-            dimg = self._vis_detections(img.shape, detections)
-            rval = return_info, dimg
-
-        else:
-
-            rval = return_info
-
         self.libc.apriltag_detections_destroy(detections)
 
-        return rval
+        return return_info
 
 
     def add_tag_family(self, name):
@@ -409,47 +392,6 @@ image of type numpy.uint8.'''
         else:
             print('Unrecognized tag family name. Try e.g. tag36h11')
 
-    def detection_pose(self, detection, camera_params, tag_size=1, z_sign=1):
-
-        fx, fy, cx, cy = [ ctypes.c_double(c) for c in camera_params ]
-        
-        H = self.libc.matd_create(3, 3)
-        arr = _matd_get_array(H)
-        arr[:] = detection.homography
-        corners = detection.corners.flatten().astype(numpy.float64)
-
-        dptr = ctypes.POINTER(ctypes.c_double)
-
-        corners = corners.ctypes.data_as(dptr)
-
-        init_error = ctypes.c_double(0)
-        final_error = ctypes.c_double(0)
-        
-        Mptr = self.libc.pose_from_homography(H, fx, fy, cx, cy,
-                                              ctypes.c_double(tag_size),
-                                              ctypes.c_double(z_sign),
-                                              corners,
-                                              dptr(init_error),
-                                              dptr(final_error))
-
-        M = _matd_get_array(Mptr).copy()
-        self.libc.matd_destroy(H)
-        self.libc.matd_destroy(Mptr)
-
-        return M, init_error.value, final_error.value
-
-    def _vis_detections(self, shape, detections):
-
-        height, width = shape
-        c_dimg = self.libc.image_u8_create(width, height)
-        self.libc.apriltag_vis_detections(detections, c_dimg)
-        tmp = _image_u8_get_array(c_dimg)
-
-        rval = tmp[:, :width].copy()
-
-        self.libc.image_u8_destroy(c_dimg)
-
-        return rval
 
     def _declare_return_types(self):
 
@@ -459,9 +401,7 @@ image of type numpy.uint8.'''
         self.libc.image_u8_create.restype = ctypes.POINTER(_ImageU8)
         self.libc.image_u8_write_pnm.restype = ctypes.c_int
         self.libc.apriltag_family_list.restype = ctypes.POINTER(_ZArray)
-        self.libc.apriltag_vis_detections.restype = None
 
-        self.libc.pose_from_homography.restype = ctypes.POINTER(_Matd)
         self.libc.matd_create.restype = ctypes.POINTER(_Matd)
 
     def _convert_image(self, img):
@@ -503,56 +443,6 @@ def _camera_params(pstr):
     assert( len(params) ==  4)
 
     return params
-
-######################################################################
-
-def _draw_pose(overlay, camera_params, tag_size, pose, z_sign=1):
-
-    opoints = numpy.array([
-        -1, -1, 0,
-         1, -1, 0,
-         1,  1, 0,
-        -1,  1, 0,
-        -1, -1, -2*z_sign,
-         1, -1, -2*z_sign,
-         1,  1, -2*z_sign,
-        -1,  1, -2*z_sign,
-    ]).reshape(-1, 1, 3) * 0.5*tag_size
-
-    edges = numpy.array([
-        0, 1,
-        1, 2,
-        2, 3,
-        3, 0,
-        0, 4,
-        1, 5,
-        2, 6,
-        3, 7,
-        4, 5,
-        5, 6,
-        6, 7,
-        7, 4
-    ]).reshape(-1, 2)
-        
-    fx, fy, cx, cy = camera_params
-
-    K = numpy.array([fx, 0, cx, 0, fy, cy, 0, 0, 1]).reshape(3, 3)
-
-    rvec, _ = cv2.Rodrigues(pose[:3,:3])
-    tvec = pose[:3, 3]
-
-    dcoeffs = numpy.zeros(5)
-
-    ipoints, _ = cv2.projectPoints(opoints, rvec, tvec, K, dcoeffs)
-
-    ipoints = numpy.round(ipoints).astype(int)
-    
-    ipoints = [tuple(pt) for pt in ipoints.reshape(-1, 2)]
-
-    for i, j in edges:
-        cv2.line(overlay, ipoints[i], ipoints[j], (0, 255, 0), 1, 16)
-
-    
 
 ######################################################################
 
@@ -635,25 +525,6 @@ def main():
             print( 'Detection {} of {}:'.format(i+1, num_detections))
             print()
             print(detection.tostring(indent=2))
-
-            if options.camera_params is not None:
-                
-                pose, e0, e1 = det.detection_pose(detection,
-                                                  options.camera_params,
-                                                  options.tag_size)
-
-                if _HAVE_CV2:
-                    _draw_pose(overlay,
-                               options.camera_params,
-                               options.tag_size,
-                               pose)
-                
-                print(detection.tostring(
-                    collections.OrderedDict([('Pose',pose),
-                                             ('InitError', e0),
-                                             ('FinalError', e1)]),
-                    indent=2))
-                
             print()
 
 
