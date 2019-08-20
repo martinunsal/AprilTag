@@ -57,7 +57,7 @@ struct image_u8_lut
 // Create or load an image. returns NULL on failure. Uses default
 // stride alignment.
 image_u8_t *image_u8_create_stride(unsigned int width, unsigned int height, unsigned int stride);
-image_u8_t *image_u8_create(unsigned int width, unsigned int height);
+__declspec(dllexport) image_u8_t *image_u8_create(unsigned int width, unsigned int height);
 image_u8_t *image_u8_create_alignment(unsigned int width, unsigned int height, unsigned int alignment);
 image_u8_t *image_u8_create_from_rgb3(int width, int height, uint8_t *rgb, int stride);
 image_u8_t *image_u8_create_from_f32(image_f32_t *fim);
@@ -80,11 +80,11 @@ void image_u8_gaussian_blur(image_u8_t *im, double sigma, int k);
 // 1.5, 2, 3, 4, ... supported
 image_u8_t *image_u8_decimate(image_u8_t *im, float factor);
 
-void image_u8_destroy(image_u8_t *im);
+__declspec(dllexport) void image_u8_destroy(image_u8_t *im);
 
 // Write a pnm. Returns 0 on success
 // Currently only supports GRAY and RGBA. Does not write out alpha for RGBA
-int image_u8_write_pnm(const image_u8_t *im, const char *path);
+__declspec(dllexport) int image_u8_write_pnm(const image_u8_t *im, const char *path);
 
 // rotate the image by 'rad' radians. (Rotated in the "intuitive
 // sense", i.e., if Y were up. When input values are unavailable, the

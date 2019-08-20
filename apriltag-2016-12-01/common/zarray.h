@@ -198,7 +198,7 @@ static inline void zarray_add(zarray_t *za, const void *p)
  * index of 'idx' and copies its value into the variable pointed to by the pointer
  * 'p'.
  */
-void zarray_get(const zarray_t *za, int idx, void *p);
+__declspec(dllexport) void zarray_get(const zarray_t *za, int idx, void *p);
 
 /**
  * Similar to zarray_get(), but returns a "live" pointer to the internal

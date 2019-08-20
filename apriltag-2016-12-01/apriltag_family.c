@@ -23,7 +23,7 @@ static const struct apriltag_family_info lookup[] = {
   { NULL, NULL }
 };
 
-zarray_t* apriltag_family_list() {
+__declspec(dllexport) zarray_t* apriltag_family_list() {
 
   zarray_t* rval = zarray_create(sizeof(const char*));
 
@@ -37,11 +37,11 @@ zarray_t* apriltag_family_list() {
   
 }
 
-void apriltag_family_list_destroy(zarray_t* za) {
+__declspec(dllexport) void apriltag_family_list_destroy(zarray_t* za) {
     zarray_destroy(za);
 }
 
-apriltag_family_t* apriltag_family_create(const char* famname) {
+__declspec(dllexport) apriltag_family_t* apriltag_family_create(const char* famname) {
 
   int i;
 
@@ -56,7 +56,7 @@ apriltag_family_t* apriltag_family_create(const char* famname) {
 }
 
 
-void apriltag_family_destroy(apriltag_family_t *tf) {
+__declspec(dllexport) void apriltag_family_destroy(apriltag_family_t *tf) {
   
    free(tf->name);
    free(tf->codes);

@@ -250,13 +250,13 @@ struct apriltag_detection
 };
 
 // don't forget to add a family!
-apriltag_detector_t *apriltag_detector_create();
+__declspec(dllexport) apriltag_detector_t *apriltag_detector_create();
 
 // add a family to the apriltag detector. caller still "owns" the family.
 // a single instance should only be provided to one apriltag detector instance.
 void apriltag_detector_add_family_bits(apriltag_detector_t *td, apriltag_family_t *fam, int bits_corrected);
 
-void apriltag_detector_add_family(apriltag_detector_t *td, apriltag_family_t *fam);
+__declspec(dllexport) void apriltag_detector_add_family(apriltag_detector_t *td, apriltag_family_t *fam);
 
 // does not deallocate the family.
 void apriltag_detector_remove_family(apriltag_detector_t *td, apriltag_family_t *fam);
@@ -266,19 +266,19 @@ void apriltag_detector_clear_families(apriltag_detector_t *td);
 
 // Destroy the april tag detector (but not the underlying
 // apriltag_family_t used to initialize it.)
-void apriltag_detector_destroy(apriltag_detector_t *td);
+__declspec(dllexport) void apriltag_detector_destroy(apriltag_detector_t *td);
 
 // Detect tags from an image and return an array of
 // apriltag_detection_t*. You can use apriltag_detections_destroy to
 // free the array and the detections it contains, or call
 // _detection_destroy and zarray_destroy yourself.
-zarray_t *apriltag_detector_detect(apriltag_detector_t *td, image_u8_t *im_orig);
+__declspec(dllexport) zarray_t *apriltag_detector_detect(apriltag_detector_t *td, image_u8_t *im_orig);
 
 // Call this method on each of the tags returned by apriltag_detector_detect
 void apriltag_detection_destroy(apriltag_detection_t *det);
 
 // destroys the array AND the detections within it.
-void apriltag_detections_destroy(zarray_t *detections);
+__declspec(dllexport) void apriltag_detections_destroy(zarray_t *detections);
 
 // Renders the apriltag with with 1px white border.
 // Caller is responsible for calling image_u8_destroy on the image

@@ -342,7 +342,7 @@ void apriltag_detector_add_family_bits(apriltag_detector_t *td, apriltag_family_
 // Tunable, but really, 2 is a good choice. Values of >=3
 // consume prohibitively large amounts of memory, and otherwise
 // you want the largest value possible.
-void apriltag_detector_add_family(apriltag_detector_t *td, apriltag_family_t *fam)
+__declspec(dllexport) void apriltag_detector_add_family(apriltag_detector_t *td, apriltag_family_t *fam)
 {
     apriltag_detector_add_family_bits(td, fam, 2);
 }
@@ -357,7 +357,7 @@ void apriltag_detector_clear_families(apriltag_detector_t *td)
     zarray_clear(td->tag_families);
 }
 
-apriltag_detector_t *apriltag_detector_create()
+__declspec(dllexport) apriltag_detector_t *apriltag_detector_create()
 {
     apriltag_detector_t *td = (apriltag_detector_t*) calloc(1, sizeof(apriltag_detector_t));
 
@@ -391,7 +391,7 @@ apriltag_detector_t *apriltag_detector_create()
     return td;
 }
 
-void apriltag_detector_destroy(apriltag_detector_t *td)
+__declspec(dllexport) void apriltag_detector_destroy(apriltag_detector_t *td)
 {
     timeprofile_destroy(td->tp);
     workerpool_destroy(td->wp);
@@ -1103,7 +1103,7 @@ int prefer_smaller(int pref, double q0, double q1)
     return 0;
 }
 
-zarray_t *apriltag_detector_detect(apriltag_detector_t *td, image_u8_t *im_orig)
+__declspec(dllexport) zarray_t *apriltag_detector_detect(apriltag_detector_t *td, image_u8_t *im_orig)
 {
     if (zarray_size(td->tag_families) == 0) {
         zarray_t *s = zarray_create(sizeof(apriltag_detection_t*));
@@ -1510,7 +1510,7 @@ zarray_t *apriltag_detector_detect(apriltag_detector_t *td, image_u8_t *im_orig)
 
 
 // Call this method on each of the tags returned by apriltag_detector_detect
-void apriltag_detections_destroy(zarray_t *detections)
+__declspec(dllexport) void apriltag_detections_destroy(zarray_t *detections)
 {
     for (int i = 0; i < zarray_size(detections); i++) {
         apriltag_detection_t *det;

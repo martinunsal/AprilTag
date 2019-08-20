@@ -76,7 +76,7 @@ typedef struct
  * to zero. It is the caller's responsibility to call matd_destroy() on the
  * returned matrix.
  */
-matd_t *matd_create(int rows, int cols);
+__declspec(dllexport) matd_t *matd_create(int rows, int cols);
 
 /**
  * Creates a double matrix with the given number of rows and columns (or a scalar
